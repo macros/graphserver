@@ -5,7 +5,7 @@ require 'uri'
 require 'pp'
 
 # Get network stats
-stat_list = Net::HTTP.get URI.parse("http://delivery.liftium.com/ganglia_export")
+stat_list = Net::HTTP.get URI.parse("http://liftium.wikia.com/ganglia_export")
 stat_list.split("\n").each do |line|
   url =  URI.parse(line)
   network_id = /network_id=(.*)/.match(url.query).captures
@@ -25,7 +25,7 @@ stat_list.split("\n").each do |line|
 end
 
 # Grab extra stats
-misc_stats = Net::HTTP.get URI.parse('http://delivery.liftium.com/ganglia_export?list_type=misc')
+misc_stats = Net::HTTP.get URI.parse('http://liftium.wikia.com/ganglia_export?list_type=misc')
 
 misc_stats.split("\n").each do |line|
   line.gsub! /:\s/, ':'
