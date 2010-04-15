@@ -11,8 +11,7 @@ require 'ftools';
 ### due to the new ganglia setup (see FB 5), the server is now known
 ### by it's FQDN, and not localhost, so we have to change the path
 ### on the file system to match --jos
-#@@liftium_path   = "#{@@rrd_path}/Liftium/localhost.localdomain/"
-@@liftium_path   = "#{@@rrd_path}/Liftium/dev.liftium.com/"
+@@liftium_path   = "#{@@rrd_path}/Liftium/liftium-s1/"
 
 # 2x2 pixel gif
 @@fallback_image = File.expand_path( File.dirname( $0 ) + '/white.gif' );
