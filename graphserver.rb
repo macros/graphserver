@@ -47,6 +47,7 @@ def send_fallback_image( reason )
 
 end
 
+
 get '/chart' do
   rrd_opts = []
   colors = [ "00FF00C0", "FF0000C0", "0000FFC0" ]
@@ -88,12 +89,9 @@ get '/misc' do
   send_rrd_graph(rrd_opts)
 end 
 
-
-get '/sparkline' do
+def get_rrd_array(range,net,tag)
   results = []
   rrd_opts = []
-  net = params[:net]
-  tag = params[:tag]
   rrd_opts << "--start=-#{params[:range]}"
 
   rrd_opts << "-m 75"
@@ -114,7 +112,15 @@ get '/sparkline' do
       results << value.to_i
     end
   end
+  return results
+end
+
+get '/sparkline' do
+  range = params[:range]
+  net = params[:net]
+  tag = params[:tag]
   
+  results = get_rrd_array(range,net,tag)
   begin 
       image = Sparklines.plot( results, 
             :type           => 'area',
