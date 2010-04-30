@@ -47,6 +47,31 @@ def send_fallback_image( reason )
 
 end
 
+def get_rrd_array(range,net,tag)
+  results = []
+  rrd_opts = []
+  rrd_opts << "--start=-#{params[:range]}"
+
+  rrd_opts << "-m 75"
+  ['loads','attempts'].each do |stat|
+    rrd_opts << "DEF:#{stat}=#{@@liftium_path}/liftium_#{net}_#{tag}_#{stat}.rrd:sum:AVERAGE"
+  end
+  rrd_opts << "CDEF:fill=loads,attempts,/,100,*"
+  rrd_opts << "XPORT:fill"
+
+  xml = `rrdtool xport #{rrd_opts.join(' ')}`
+  data = xml.scan(/<v>(.*)<\/v>/)
+  data.each do |item|
+    if item[0].to_s == "NaN"
+      results << 0
+    else
+      # Convert rrds sci notation to decimal
+      value = "%4.2f" % item[0]
+      results << value.to_i
+    end
+  end
+  return results
+end
 
 get '/chart' do
   rrd_opts = []
@@ -89,33 +114,8 @@ get '/misc' do
   send_rrd_graph(rrd_opts)
 end 
 
-def get_rrd_array(range,net,tag)
-  results = []
-  rrd_opts = []
-  rrd_opts << "--start=-#{params[:range]}"
-
-  rrd_opts << "-m 75"
-  ['loads','attempts'].each do |stat|
-    rrd_opts << "DEF:#{stat}=#{@@liftium_path}/liftium_#{net}_#{tag}_#{stat}.rrd:sum:AVERAGE"
-  end
-  rrd_opts << "CDEF:fill=loads,attempts,/,100,*"
-  rrd_opts << "XPORT:fill"
-
-  xml = `rrdtool xport #{rrd_opts.join(' ')}`
-  data = xml.scan(/<v>(.*)<\/v>/)
-  data.each do |item|
-    if item[0].to_s == "NaN"
-      results << 0
-    else
-      # Convert rrds sci notation to decimal
-      value = "%4.2f" % item[0]
-      results << value.to_i
-    end
-  end
-  return results
-end
-
 get '/sparkline' do
+  send_fallback_image "Manually disabled for perf"
   range = params[:range]
   net = params[:net]
   tag = params[:tag]
@@ -141,3 +141,12 @@ get '/sparkline' do
   
 end
 
+get '/json_spark' do
+  range = params[:range]
+  net = params[:net]
+  tag = params[:tag]
+
+  results = get_rrd_array(range,net,tag)
+  return results.to_json
+
+end
